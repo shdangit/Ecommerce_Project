@@ -1,13 +1,14 @@
 const express = require("express");
+const dbConnect = require("./config/db.connect");
+const initRouter = require("./routes/index.routes");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.Port || 888;
+const port = process.env.PORT || 888;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/", (req, res) => {
-  res.json("hleo");
-});
+dbConnect();
+initRouter(app);
 
 app.listen(port, () => {
   console.log("server running success: ", +port);
