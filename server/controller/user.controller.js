@@ -39,16 +39,20 @@ const login = asyncHandler(async (req, res, next) => {
   // findOne trả một instance nên phải dùng toOjacet() để convert sang một plain Object
   const user = await userModel.findOne({ email });
   if (user && (await user.checkPassword(password))) {
-    const { role, password, ...isUser } = user.toObject();
+    const { role, password, refreshToken, ...isUser } = user.toObject();
     const accessToken = signAccessToken(user._id, role);
-    const refreshToken = signRefreshToken(user._id);
+    const newRefreshToken = signRefreshToken(user._id);
 
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     // {new:true}: trả data sau khi cập nhật
-    await userModel.findOneAndUpdate(user._id, { refreshToken }, { new: true });
+    await userModel.findOneAndUpdate(
+      user._id,
+      { refreshToken: newRefreshToken },
+      { new: true }
+    );
     return res.status(200).json({
       success: true,
       accessToken,
@@ -59,7 +63,7 @@ const login = asyncHandler(async (req, res, next) => {
   }
 });
 
-const getUser = asyncHandler(async (req, res, next) => {
+const getMe = asyncHandler(async (req, res, next) => {
   const { _id } = req.user;
   const user = await userModel
     .findById(_id)
@@ -188,12 +192,32 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
+const updateMe = asyncHandler(async (req, res, next) => {
+  const { _id } = req.user;
+  if (!_id || Object.keys(req.body).length === 0)
+    throw new Error("Require value for update");
+  const user = await userModel
+    .findByIdAndUpdate(_id, req.body, { new: true })
+    .select("-password -role -refreshToken");
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+  return res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
 module.exports = {
   register,
   login,
-  getUser,
+  getMe,
   refreshAccessToken,
   logout,
   forgotPassword,
   resetPassword,
+  updateMe,
 };
