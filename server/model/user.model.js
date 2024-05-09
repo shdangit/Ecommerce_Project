@@ -1,6 +1,6 @@
 const mongoose = require("mongoose"); // Erase if already required
 const bcrypt = require("bcrypt"); // Erase if already required
-const crypto = require("crypto-js"); // Erase if already required
+const crypto = require("crypto"); // Erase if already required
 
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema(
@@ -16,7 +16,7 @@ var userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      //   required: true,
+      default: "",
     },
     password: {
       type: String,
@@ -49,7 +49,7 @@ var userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
-    passwordChange: {
+    passwordChangeAt: {
       type: String,
     },
     passwordResetToken: {
@@ -79,14 +79,14 @@ userSchema.methods = {
   checkPassword: function (inputPassword) {
     return bcrypt.compare(inputPassword, this.password);
   },
-  // createPasswordChangeToken: function () {
-  //   const passwordToken = crypto.randomBytes(32).toString("hex");
-  //   this.passwordResetToken = crypto
-  //     .createHash("sha256")
-  //     .update(passwordToken)
-  //     .disget("hex");
-  //   this.passwordResetExpires = Date().now + 15 * 60 * 1000;
-  //   return passwordToken;
-  // },
+  createPasswordChangeToken: function () {
+    const passwordToken = crypto.randomBytes(32).toString("hex");
+    this.passwordResetToken = crypto
+      .createHash("sha256")
+      .update(passwordToken)
+      .digest("hex");
+    this.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+    return passwordToken;
+  },
 };
 module.exports = mongoose.model("User", userSchema);

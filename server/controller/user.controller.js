@@ -2,6 +2,8 @@ const asyncHandler = require("express-async-handler");
 const userModel = require("../model/user.model");
 const { signAccessToken, signRefreshToken } = require("../util/jwt");
 const jwt = require("jsonwebtoken");
+const sendEmail = require("../util/sendEmail");
+const crypto = require("crypto");
 
 const register = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -142,12 +144,48 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   if (user) {
     const passwordToken = user.createPasswordChangeToken();
     await user.save();
+
+    const html = `Xin hãy click vào link để thay đổi mật khẩu của bạn <a href="${process.env.DB_URL}/api/user/reset-password/${passwordToken}">Click</a>`;
+    const result = await sendEmail(email, html);
+    return res.status(200).json({
+      success: true,
+      result,
+    });
   } else {
     return res.status(404).json({
       success: false,
       message: "User not found",
     });
   }
+});
+
+const resetPassword = asyncHandler(async (req, res, next) => {
+  const { token, password } = req.body;
+  if (!token || !password)
+    throw new Error("Password token or password invalid");
+  const passwordResetToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+  const user = await userModel.findOne({
+    passwordResetToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+  user.password = password;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  user.passwordChangeAt = Date.now();
+  await user.save();
+  return res.status(200).json({
+    success: user ? true : false,
+    message: user ? "Update password success" : "Error update assword",
+  });
 });
 
 module.exports = {
@@ -157,4 +195,5 @@ module.exports = {
   refreshAccessToken,
   logout,
   forgotPassword,
+  resetPassword,
 };
