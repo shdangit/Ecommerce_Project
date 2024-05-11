@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const register = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({
+    return res.status(422).json({
       success: false,
       message: "Email and password are required",
     });
@@ -30,7 +30,7 @@ const register = asyncHandler(async (req, res, next) => {
 const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({
+    return res.status(422).json({
       success: false,
       message: "Email and password are required",
     });
@@ -74,7 +74,7 @@ const getMe = asyncHandler(async (req, res, next) => {
       data: user,
     });
   } else {
-    return res.status(404).json({
+    return res.status(400).json({
       success: false,
       message: "User not found",
     });
@@ -134,7 +134,7 @@ const logout = asyncHandler(async (req, res, next) => {
       });
     }
   } else {
-    return res.status(404).json({
+    return res.status(400).json({
       success: false,
       message: "User not found",
     });
@@ -156,7 +156,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
       result,
     });
   } else {
-    return res.status(404).json({
+    return res.status(400).json({
       success: false,
       message: "User not found",
     });
@@ -176,7 +176,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
     passwordResetExpires: { $gt: Date.now() },
   });
   if (!user) {
-    return res.status(404).json({
+    return res.status(400).json({
       success: false,
       message: "User not found",
     });
@@ -200,7 +200,7 @@ const updateMe = asyncHandler(async (req, res, next) => {
     .findByIdAndUpdate(_id, req.body, { new: true })
     .select("-password -role -refreshToken");
   if (!user) {
-    return res.status(404).json({
+    return res.status(400).json({
       success: false,
       message: "User not found",
     });
