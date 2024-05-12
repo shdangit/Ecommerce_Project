@@ -17,5 +17,6 @@ router.delete(
   isAdmin,
   proudct.deleteProduct
 );
+router.put("/rating-product", verifyAccessToken, proudct.ratings);
 
 module.exports = router;
