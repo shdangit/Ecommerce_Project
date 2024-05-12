@@ -4,12 +4,7 @@ const category = require("../controller/category.controller");
 const router = require("express").Router();
 
 router.post("/add-category", verifyAccessToken, isAdmin, category.addCategory);
-router.get(
-  "/get-categories",
-  verifyAccessToken,
-  isAdmin,
-  category.getCategories
-);
+router.get("/get-categories", category.getCategories);
 router.put(
   "/update-category/:id",
   verifyAccessToken,
