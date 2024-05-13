@@ -1,22 +1,30 @@
 const router = require("express").Router();
-const proudct = require("../controller/product.controller");
+const uploadCloud = require("../config/cloudinary.config");
+const product = require("../controller/product.controller");
 const { verifyAccessToken, isAdmin } = require("../util/verifyToken");
 
-router.post("/add-product", verifyAccessToken, isAdmin, proudct.addProduct);
-router.get("/get-products", verifyAccessToken, isAdmin, proudct.getProducts);
-router.get("/get-product/:id", proudct.getProduct);
+router.post("/add-product", verifyAccessToken, isAdmin, product.addProduct);
+router.get("/get-products", verifyAccessToken, isAdmin, product.getProducts);
+router.get("/get-product/:id", product.getProduct);
 router.put(
   "/update-product/:id",
   verifyAccessToken,
   isAdmin,
-  proudct.updateProduct
+  product.updateProduct
 );
 router.delete(
   "/delete-product/:id",
   verifyAccessToken,
   isAdmin,
-  proudct.deleteProduct
+  product.deleteProduct
 );
-router.put("/rating-product", verifyAccessToken, proudct.ratings);
+router.put(
+  "/upload-image/:id",
+  verifyAccessToken,
+  isAdmin,
+  uploadCloud.array("images"),
+  product.uploadImageProduct
+);
+router.put("/rating-product", verifyAccessToken, product.ratings);
 
 module.exports = router;

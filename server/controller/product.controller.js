@@ -153,6 +153,23 @@ const ratings = asyncHandler(async (req, res, next) => {
   });
 });
 
+const uploadImageProduct = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  if (!req.files) throw new Error("Hình ảnh cho sản phẩmphẩm là bắt buộc ");
+  const product = await productModel.findByIdAndUpdate(
+    id,
+    {
+      $push: { images: { $each: req.files.map((element) => element.path) } },
+    },
+    { new: true }
+  );
+
+  return res.status(product ? 200 : 500).json({
+    success: product ? true : false,
+    data: product ? product : "Không thể hình ảnh cho sản phẩm",
+  });
+});
+
 module.exports = {
   addProduct,
   getProduct,
@@ -160,4 +177,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   ratings,
+  uploadImageProduct,
 };

@@ -135,6 +135,23 @@ const dislikeBlog = asyncHandler(async (req, res, next) => {
   }
 });
 
+const uploadImageBlog = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  if (!req.file) throw new Error("Hình ảnh cho sản blog là bắt buộc ");
+  const blog = await blogModel.findByIdAndUpdate(
+    id,
+    {
+      image: req.file.path,
+    },
+    { new: true }
+  );
+
+  return res.status(blog ? 200 : 500).json({
+    success: blog ? true : false,
+    data: blog ? blog : "Không thể hình ảnh cho blog",
+  });
+});
+
 module.exports = {
   addBlog,
   getBlogs,
@@ -143,4 +160,5 @@ module.exports = {
   deleteBlog,
   likeBlog,
   dislikeBlog,
+  uploadImageBlog,
 };
