@@ -7,7 +7,7 @@ const addProduct = asyncHandler(async (req, res, next) => {
     throw new Error("Thông tin sản phẩm là bắt buộc");
   if (req.body && req.body.title) req.body.slug = slugify(req.body.title);
   const newProduct = await productModel.create(req.body);
-  return res.status(newProduct ? 200 : 400).json({
+  return res.status(newProduct ? 200 : 500).json({
     success: newProduct ? true : false,
     data: newProduct ? newProduct : "Không thể thêm sản phẩm mới",
   });
@@ -86,18 +86,18 @@ const updateProduct = asyncHandler(async (req, res, next) => {
   const product = await productModel.findByIdAndUpdate(id, req.body, {
     new: true,
   });
-  return res.status(product ? 200 : 404).json({
+  return res.status(product ? 200 : 500).json({
     success: product ? true : false,
-    data: product ? product : "Không tìm thấy sản phẩm",
+    data: product ? product : "Không thể cập nhật sản phẩm",
   });
 });
 
 const deleteProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const product = await productModel.findByIdAndDelete(id);
-  return res.status(product ? 200 : 404).json({
+  return res.status(product ? 200 : 500).json({
     success: product ? true : false,
-    data: product ? `${product.title} is deleted` : "Không tìm thấy sản phẩm",
+    data: product ? `${product.title} is deleted` : "Không thể xóa sản phẩm",
   });
 });
 

@@ -4,7 +4,7 @@ const blogCategoryModel = require("../model/blogCategory.model");
 const addBlogCategory = asyncHandler(async (req, res, next) => {
   if (!req.body.title) throw new Error("Blog category là bắt buộc");
   const blogCategory = await blogCategoryModel.create(req.body);
-  return res.status(blogCategory ? 200 : 400).json({
+  return res.status(blogCategory ? 200 : 500).json({
     success: blogCategory ? true : false,
     data: blogCategory ? blogCategory : "Không thể thêm danh mục cho blog",
   });
@@ -23,20 +23,20 @@ const updateBlogCategory = asyncHandler(async (req, res, next) => {
   const blogCategory = await blogCategoryModel.findByIdAndUpdate(id, req.body, {
     new: true,
   });
-  return res.status(blogCategory ? 200 : 404).json({
+  return res.status(blogCategory ? 200 : 500).json({
     success: blogCategory ? true : false,
-    data: blogCategory ? blogCategory : "Không tìm thấy danh mục cho blog",
+    data: blogCategory ? blogCategory : "Không thể cập nhật danh mục cho blog",
   });
 });
 
 const deleteBlogCategory = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const blogCategory = await blogCategoryModel.findByIdAndDelete(id);
-  return res.status(blogCategory ? 200 : 404).json({
+  return res.status(blogCategory ? 200 : 500).json({
     success: blogCategory ? true : false,
     message: blogCategory
       ? `Danh mục ${blogCategory.title} của blog đã được xóa`
-      : "Không tìm thấy danh mục cho blog",
+      : "Không thể xóa danh mục cho blog",
   });
 });
 
