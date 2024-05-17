@@ -211,6 +211,71 @@ const updateMe = asyncHandler(async (req, res, next) => {
   });
 });
 
+const updateAddressMe = asyncHandler(async (req, res, next) => {
+  const { _id } = req.user;
+  if (!req.body.address) throw new Error("Thông tin điạ chỉ là bắt buộc");
+  const user = await userModel
+    .findByIdAndUpdate(
+      _id,
+      { $push: { address: req.body.address } },
+      { new: true }
+    )
+    .select("-password -role -refreshToken");
+  return res.status(user ? 200 : 500).json({
+    success: user ? true : false,
+    data: user ? user : "Không thể cập nhật địa chỉ cho user",
+  });
+});
+
+const updateCart = asyncHandler(async (req, res, next) => {
+  const { _id } = req.user;
+  const { id, quantity, color } = req.body;
+  if (!id || !quantity || !color)
+    throw new Error("Thông tin giỏ hàng là bắt buộc");
+
+  const user = await userModel.findById(_id);
+  const carted = user?.cart.filter(
+    (element) => element.product.toString() === id
+  );
+
+  if (carted.length > 0) {
+    const isDifferentColor = carted.find((element) => element.color === color);
+
+    if (isDifferentColor) {
+      const totalQuantity = isDifferentColor.quantity + quantity;
+      const cart = await userModel.updateOne(
+        { cart: { $elemMatch: isDifferentColor } },
+        { $set: { "cart.$.quantity": totalQuantity } },
+        { new: true }
+      );
+      return res.status(cart ? 200 : 500).json({
+        success: cart ? true : false,
+        data: cart ? cart : "Không thể cập nhật giỏ hàng",
+      });
+    } else {
+      const cart = await userModel.findByIdAndUpdate(
+        _id,
+        { $push: { cart: { product: id, quantity, color } } },
+        { new: true }
+      );
+      return res.status(cart ? 200 : 500).json({
+        success: cart ? true : false,
+        data: cart ? cart : "Không thể cập nhật giỏ hàng",
+      });
+    }
+  } else {
+    const cart = await userModel.findByIdAndUpdate(
+      _id,
+      { $push: { cart: { product: id, quantity, color } } },
+      { new: true }
+    );
+
+    return res.status(cart ? 200 : 500).json({
+      success: cart ? true : false,
+      data: cart ? cart : "Không thể cập nhật giỏ hàng",
+    });
+  }
+});
 module.exports = {
   register,
   login,
@@ -220,4 +285,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   updateMe,
+  updateAddressMe,
+  updateCart,
 };

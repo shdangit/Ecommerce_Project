@@ -10,5 +10,7 @@ router.post("/logout", verifyAccessToken, user.logout);
 router.get("/forgot-password", user.forgotPassword);
 router.put("/reset-password", user.resetPassword);
 router.put("/update-me", verifyAccessToken, user.updateMe);
+router.put("/update-address-me", verifyAccessToken, user.updateAddressMe);
+router.put("/update-cart", verifyAccessToken, user.updateCart);
 
 module.exports = router;
