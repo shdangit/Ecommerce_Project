@@ -11,14 +11,12 @@ var productSchema = new mongoose.Schema(
     //   slug: link,example (dong-ho-apple)
     slug: {
       type: String,
-      unique: true,
       required: true,
       lowercase: true,
     },
     description: {
-      type: String,
-      required: true,
-      unique: true,
+      type: Array,
+      // required: true,
     },
     brand: {
       type: String,
@@ -29,8 +27,8 @@ var productSchema = new mongoose.Schema(
       required: true,
     },
     category: {
-      type: mongoose.Types.ObjectId,
-      ref: "Category",
+      type: String,
+      required: true,
     },
     quatity: {
       type: Number,
@@ -45,7 +43,7 @@ var productSchema = new mongoose.Schema(
     },
     color: {
       type: String,
-      enum: ["Black", "Blue", "Yellow"],
+      default: "",
     },
     ratings: [
       {
